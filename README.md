@@ -151,19 +151,10 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 ### port configuration (project b - synth bot)
 
-**Updated to avoid conflicts with Project A (Ledger):**
-
-- **PostgreSQL**: Port 5433 (changed from 5432 to avoid conflict)
-- **FastAPI**: Port 8000 (different from Project A's 8080)
-- **Qdrant**: Port 6333 (no conflict)
-- **Qdrant gRPC**: Port 6334 (no conflict)
-
-**Project A (Ledger) uses:**
-
-- PostgreSQL: 5432
-- Redis: 6379
-- React Frontend: 3000
-- Backend API: 8080
+- **PostgreSQL**: Port 5433 
+- **FastAPI**: Port 8000
+- **Qdrant**: Port 6333 
+- **Qdrant gRPC**: Port 6334 
 
 ### service urls
 
