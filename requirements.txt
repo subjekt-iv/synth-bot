@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+pydantic-settings
+langchain
+langchain-openai
+qdrant-client
+psycopg2-binary
+PyMuPDF
+SQLAlchemy
+alembic
+python-dotenv
+pytest
+httpx
+tiktoken
+lxml
+python-multipart
