@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     app_name: str = "Synthesizer Chatbot API"
     debug: bool = True
     log_level: str = "INFO"
+    # Safety: Disable embeddings
+    disable_embeddings: bool = False
 
     # File Upload Settings
     max_file_size: int = 10485760  # 10MB

@@ -1,6 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from app.core.config import settings
+print(f"[DEBUG] DISABLE_EMBEDDINGS = {settings.disable_embeddings}")
+
 
 from app.core.config import settings
 from app.db.database import create_tables

@@ -115,12 +115,25 @@ A FastAPI-based RAG (Retrieval-Augmented Generation) chatbot system that can pro
 
 ## 🚀 Current Status
 
-### Running Services
+### ✅ Environment Configuration - COMPLETED
 
-- ✅ **FastAPI Application**: Running on http://localhost:8000
+- ✅ **`.env` file exists** and is properly configured with:
+  ```
+  OPENAI_API_KEY=sk-proj-...
+  QDRANT_API_URL=http://localhost:6333
+  DATABASE_URL=postgresql://user:password@localhost:5433/synthesizer_chatbot
+  DEBUG=True
+  MAX_FILE_SIZE=10485760
+  UPLOAD_DIR=./uploads
+  DISABLE_EMBEDDINGS=true
+  ```
+
+### ✅ Running Services - ALL OPERATIONAL
+
+- ✅ **FastAPI Application**: Running on http://localhost:8000 (Healthy)
 - ✅ **PostgreSQL Database**: Healthy and connected (Port 5433)
-- ✅ **Qdrant Vector Database**: Running on http://localhost:6333
-- ✅ **Docker Compose**: All services orchestrated
+- ✅ **Qdrant Vector Database**: Running on http://localhost:6333 (Healthy)
+- ✅ **Docker Compose**: All services orchestrated and running
 
 ### Port Configuration (Project B - Synth Bot)
 
@@ -147,22 +160,19 @@ A FastAPI-based RAG (Retrieval-Augmented Generation) chatbot system that can pro
 - `DELETE /documents/{document_id}` - Delete document
 - `POST /chat/` - Process chat queries with RAG
 - `GET /chat/history` - Get chat history
+- `GET /health` - Health check endpoint
+
+### ⚠️ Current Configuration Note
+
+- **Embeddings are currently disabled** (`DISABLE_EMBEDDINGS=true`) in the `.env` file
+- This means the RAG functionality will work but without vector similarity search
+- To enable full RAG functionality, set `DISABLE_EMBEDDINGS=false` in the `.env` file
 
 ## 📋 Next Steps & Roadmap
 
 ### Immediate Next Steps (Priority 1)
 
-- [ ] **Environment Configuration**
-
-  - Create `.env` file with updated port configuration:
-    ```
-    DATABASE_URL=postgresql://user:password@localhost:5433/synthesizer_chatbot
-    QDRANT_API_URL=http://localhost:6333
-    OPENAI_API_KEY=your_openai_api_key_here
-    ```
-  - Configure OpenAI API key
-  - Set up proper environment variables for Project B
-
+- [x] **Environment Configuration** ✅ COMPLETED
 - [ ] **Testing & Validation**
 
   - Test document upload functionality
@@ -176,6 +186,12 @@ A FastAPI-based RAG (Retrieval-Augmented Generation) chatbot system that can pro
   - Document API usage examples
 
 ### Short-term Goals (Priority 2)
+
+- [ ] **Enable Full RAG Functionality**
+
+  - Set `DISABLE_EMBEDDINGS=false` in `.env` file
+  - Test vector similarity search
+  - Validate embedding generation and storage
 
 - [ ] **Enhanced Error Handling**
 
@@ -221,15 +237,9 @@ A FastAPI-based RAG (Retrieval-Augmented Generation) chatbot system that can pro
 ### Environment Setup
 
 ```bash
-# Create .env file with Project B configuration
-cat > .env << EOF
-DATABASE_URL=postgresql://user:password@localhost:5433/synthesizer_chatbot
-QDRANT_API_URL=http://localhost:6333
-OPENAI_API_KEY=your_openai_api_key_here
-DEBUG=True
-MAX_FILE_SIZE=10485760
-UPLOAD_DIR=./uploads
-EOF
+# The .env file is already configured with Project B settings
+# To enable full RAG functionality, update the .env file:
+sed -i '' 's/DISABLE_EMBEDDINGS=true/DISABLE_EMBEDDINGS=false/' .env
 ```
 
 ### Running the Application
@@ -248,27 +258,20 @@ docker compose down
 docker compose up -d --build
 ```
 
-### Development Mode
+### Testing the API
 
 ```bash
-# Activate virtual environment
-source venv/bin/activate.fish
+# Health check
+curl http://localhost:8000/health
 
-# Run FastAPI in development mode
-uvicorn app.main:app --reload
-```
+# API documentation
+open http://localhost:8000/docs
 
-### Database Operations
+# List documents
+curl http://localhost:8000/documents/
 
-```bash
-# Run migrations
-alembic upgrade head
-
-# Create new migration
-alembic revision --autogenerate -m "description"
-
-# Connect to PostgreSQL (Project B)
-psql -h localhost -p 5433 -U user -d synthesizer_chatbot
+# Get chat history
+curl http://localhost:8000/chat/history
 ```
 
 ## 📊 Project Metrics
