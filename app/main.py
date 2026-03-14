@@ -8,7 +8,7 @@ print(f"[DEBUG] DISABLE_EMBEDDINGS = {settings.disable_embeddings}")
 from app.core.config import settings
 from app.db.database import create_tables
 from app.services.vector_store import vector_store
-from app.api import chat, documents
+from app.api import chat, conversations, documents
 
 
 @asynccontextmanager
@@ -53,6 +53,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(chat.router)
+app.include_router(conversations.router)
 app.include_router(documents.router)
 
 

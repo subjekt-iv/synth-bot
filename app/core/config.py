@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     disable_embeddings: bool = False
 
     # File Upload Settings
-    max_file_size: int = 10485760  # 10MB
+    max_file_size: int = 52428800  # 50MB
     upload_dir: str = "uploads"
 
     model_config = {

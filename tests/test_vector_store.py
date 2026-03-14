@@ -107,16 +107,18 @@ class TestVectorStore:
             "content": "Test content 2"
         }
         
-        mock_qdrant_client.search.return_value = [mock_scored_point1, mock_scored_point2]
-        
+        mock_query_response = MagicMock()
+        mock_query_response.points = [mock_scored_point1, mock_scored_point2]
+        mock_qdrant_client.query_points.return_value = mock_query_response
+
         # Test search
         query_embedding = [0.1, 0.2, 0.3]
         results = vector_store.search_similar(query_embedding, limit=5)
-        
-        # Assert search was called correctly
-        mock_qdrant_client.search.assert_called_once_with(
+
+        # Assert query_points was called correctly
+        mock_qdrant_client.query_points.assert_called_once_with(
             collection_name="synthesizer_manuals",
-            query_vector=[0.1, 0.2, 0.3],
+            query=[0.1, 0.2, 0.3],
             limit=5,
             with_payload=True
         )
@@ -146,15 +148,17 @@ class TestVectorStore:
     
     def test_search_similar_default_limit(self, vector_store, mock_qdrant_client):
         """Test search with default limit."""
-        mock_qdrant_client.search.return_value = []
-        
+        mock_query_response = MagicMock()
+        mock_query_response.points = []
+        mock_qdrant_client.query_points.return_value = mock_query_response
+
         query_embedding = [0.1, 0.2, 0.3]
         vector_store.search_similar(query_embedding)
-        
+
         # Assert default limit of 5 was used
-        mock_qdrant_client.search.assert_called_once_with(
+        mock_qdrant_client.query_points.assert_called_once_with(
             collection_name="synthesizer_manuals",
-            query_vector=[0.1, 0.2, 0.3],
+            query=[0.1, 0.2, 0.3],
             limit=5,
             with_payload=True
         )

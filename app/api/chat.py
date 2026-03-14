@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 import time
+from datetime import datetime
+import logging
+import traceback
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 
 from app.db.database import get_db
-from app.db.models import Chat, ChatCitation, DocumentChunk
+from app.db.models import Chat, ChatCitation, DocumentChunk, Conversation
 from app.schemas.chat import ChatRequest, ChatResponse, Citation, ChatHistoryResponse, ChatHistoryItem
 from app.rag.chain import rag_chain
 
@@ -24,14 +29,30 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
         # Calculate response time
         response_time = time.time() - start_time
         
+        # Handle conversation
+        if request.conversation_id and request.conversation_id.strip():
+            conversation = db.query(Conversation).filter(
+                Conversation.id == request.conversation_id
+            ).first()
+            if not conversation:
+                raise HTTPException(status_code=404, detail="Conversation not found")
+            conversation.updated_at = datetime.utcnow()
+            conversation_id = conversation.id
+        else:
+            conversation = Conversation(title=request.query[:80])
+            db.add(conversation)
+            db.flush()
+            conversation_id = conversation.id
+
         # Create chat record
         chat = Chat(
             user_query=request.query,
             ai_response=result["response"],
             response_time=response_time,
-            document_id=request.document_id
+            document_id=request.document_id,
+            conversation_id=conversation_id
         )
-        
+
         db.add(chat)
         db.flush()  # Get the chat ID
         
@@ -64,10 +85,12 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
         return ChatResponse(
             response=result["response"],
             citations=citations,
-            response_time=response_time
+            response_time=response_time,
+            conversation_id=str(conversation_id)
         )
         
     except Exception as e:
+        logger.error(f"[CHAT ERROR] {str(e)}\n{traceback.format_exc()}")
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error processing chat: {str(e)}")
 
@@ -77,33 +100,49 @@ async def get_chat_history(
     skip: int = 0,
     limit: int = 50,
     document_id: Optional[str] = None,
+    conversation_id: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
-    """Get chat history with optional filtering by document."""
+    """Get chat history with optional filtering by document or conversation."""
     try:
-        query = db.query(Chat)
-        
+        query = db.query(Chat).options(
+            joinedload(Chat.citations).joinedload(ChatCitation.chunk)
+        )
+
         if document_id:
             query = query.filter(Chat.document_id == document_id)
-        
+        if conversation_id:
+            query = query.filter(Chat.conversation_id == conversation_id)
+
         total = query.count()
         chats = query.offset(skip).limit(limit).all()
-        
+
         chat_items = []
         for chat in chats:
+            citations = []
+            for c in chat.citations:
+                if c.chunk:
+                    citations.append(Citation(
+                        chunk_id=str(c.chunk_id),
+                        content=str(c.chunk.content),
+                        page_number=int(c.chunk.page_number),
+                        relevance_score=c.relevance_score
+                    ))
             chat_items.append(ChatHistoryItem(
                 id=str(chat.id),
                 user_query=str(chat.user_query),
                 ai_response=str(chat.ai_response),
                 created_at=chat.created_at,  # type: ignore
                 response_time=chat.response_time,  # type: ignore
-                document_id=str(chat.document_id)
+                document_id=str(chat.document_id) if chat.document_id else None,
+                conversation_id=str(chat.conversation_id) if chat.conversation_id else None,
+                citations=citations
             ))
-        
+
         return ChatHistoryResponse(
             chats=chat_items,
             total=total
         )
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving chat history: {str(e)}") 

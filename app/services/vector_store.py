@@ -64,21 +64,21 @@ class VectorStore:
     
     def search_similar(self, query_embedding: List[float], limit: int = 5) -> List[Dict[str, Any]]:
         """Search for similar embeddings."""
-        search_result = self.client.search(
+        search_result = self.client.query_points(
             collection_name=self.collection_name,
-            query_vector=query_embedding,
+            query=query_embedding,
             limit=limit,
             with_payload=True
         )
-        
+
         results = []
-        for result in search_result:
+        for result in search_result.points:
             results.append({
                 "id": result.id,
                 "score": result.score,
                 "payload": result.payload
             })
-        
+
         return results
     
     def delete_embeddings(self, embedding_ids: List[str]):
