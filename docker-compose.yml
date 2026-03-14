@@ -33,7 +33,7 @@ services:
 
   # FastAPI Application
   app:
-    build: .
+    build: ./backend
     ports:
       - "8000:8000"
     environment:
@@ -42,7 +42,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - DEBUG=True
     volumes:
-      - ./uploads:/app/uploads
+      - ./backend/uploads:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
