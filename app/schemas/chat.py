@@ -7,6 +7,7 @@ class ChatRequest(BaseModel):
     """Request model for chat endpoint."""
     query: str
     document_id: Optional[str] = None
+    conversation_id: Optional[str] = None
 
 
 class Citation(BaseModel):
@@ -22,6 +23,7 @@ class ChatResponse(BaseModel):
     response: str
     citations: List[Citation]
     response_time: float
+    conversation_id: Optional[str] = None
 
 
 class ChatHistoryItem(BaseModel):
@@ -32,6 +34,8 @@ class ChatHistoryItem(BaseModel):
     created_at: datetime
     response_time: Optional[float] = None
     document_id: Optional[str] = None
+    conversation_id: Optional[str] = None
+    citations: List[Citation] = []
 
 
 class ChatHistoryResponse(BaseModel):

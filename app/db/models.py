@@ -41,20 +41,36 @@ class DocumentChunk(Base):
     document = relationship("Document", back_populates="chunks")
 
 
+class Conversation(Base):
+    """Model for grouping chats into conversation sessions."""
+
+    __tablename__ = "conversations"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    title = Column(String(100), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    chats = relationship("Chat", back_populates="conversation", cascade="all, delete-orphan")
+
+
 class Chat(Base):
     """Model for storing chat history."""
-    
+
     __tablename__ = "chats"
-    
+
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     document_id = Column(String, ForeignKey("documents.id"), nullable=True)
+    conversation_id = Column(String, ForeignKey("conversations.id"), nullable=True)
     user_query = Column(Text, nullable=False)
     ai_response = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     response_time = Column(Float, nullable=True)  # Response time in seconds
-    
+
     # Relationships
     document = relationship("Document", back_populates="chats")
+    conversation = relationship("Conversation", back_populates="chats")
     citations = relationship("ChatCitation", back_populates="chat", cascade="all, delete-orphan")
 
 

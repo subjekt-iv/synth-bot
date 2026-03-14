@@ -17,7 +17,7 @@ This API provides a complete solution for:
 - **Python 3.11+** - Core programming language
 - **FastAPI** - Modern, fast web framework for building APIs
 - **LangChain** - RAG orchestration and LLM integration
-- **OpenAI API** - Embeddings (text-embedding-ada-002) and completions (gpt-3.5-turbo)
+- **OpenAI API** - Embeddings (text-embedding-3-small) and completions (gpt-3.5-turbo)
 - **Qdrant** - Vector database for similarity search and storage
 - **PostgreSQL** - Metadata storage for documents, chunks, and chat history
 - **PyMuPDF** - High-performance PDF parsing and text extraction

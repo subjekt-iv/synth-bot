@@ -2,7 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 import os
 import shutil
+import logging
 from typing import List
+
+logger = logging.getLogger(__name__)
 
 from app.db.database import get_db
 from app.db.models import Document, DocumentChunk
@@ -22,14 +25,15 @@ async def upload_document(
     db: Session = Depends(get_db)
 ):
     """Upload and process a PDF document."""
+    logger.warning(f"[UPLOAD DEBUG] filename={file.filename}, content_type={file.content_type}, size={file.size}")
     # Validate file type
     if not file.filename or not file.filename.lower().endswith('.pdf'):
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
     
-    # Validate file size
-    if not file.size or file.size > settings.max_file_size:
+    # Validate file size (file.size may be None when uploaded through a proxy)
+    if file.size is not None and file.size > settings.max_file_size:
         raise HTTPException(
-            status_code=400, 
+            status_code=400,
             detail=f"File size exceeds maximum allowed size of {settings.max_file_size} bytes"
         )
     
